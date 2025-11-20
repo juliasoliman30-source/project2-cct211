@@ -2,6 +2,12 @@ import customtkinter as ctk
 from PIL import Image
 
 
+def open_new_window(master, title):
+    new_window = ctk.CTkToplevel(master)
+    new_window.title(title)
+    new_window.geometry("1200x1000")
+
+
 class HomeFrame(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -49,7 +55,8 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="All", width=100, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold")
+            font=("Arial", 24, "bold"),
+            command=lambda: open_new_window(self, "All Video Games")
         )
         self.all_button.pack(side=ctk.LEFT, padx=30)
 
@@ -57,7 +64,8 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Completed", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold")
+            font=("Arial", 24, "bold"),
+            command=lambda: open_new_window(self, "Completed Video Games")
         )
         self.completed_button.pack(side=ctk.LEFT, padx=30)
 
@@ -65,7 +73,8 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Ongoing", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold")
+            font=("Arial", 24, "bold"),
+            command=lambda: open_new_window(self, "Ongoing Video Games")
         )
         self.ongoing_button.pack(side=ctk.LEFT, padx=30)
 
@@ -73,7 +82,8 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Backlog", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold")
+            font=("Arial", 24, "bold"),
+            command=lambda: open_new_window(self, "Backlogged Video Games")
         )
         self.backlog_button.pack(side=ctk.LEFT, padx=30)
 
@@ -81,7 +91,8 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Wishlist", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold")
+            font=("Arial", 24, "bold"),
+            command=lambda: open_new_window(self, "Wishlisted Video Games")
         )
         self.wishlist_button.pack(side=ctk.LEFT, padx=30)
 
