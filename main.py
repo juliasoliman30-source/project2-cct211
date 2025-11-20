@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+from data import *
 
 
 class HomeFrame(ctk.CTkFrame):
@@ -94,7 +95,7 @@ class App(ctk.CTk):
 
         self.home_frame = HomeFrame(master=self, width=1100, height=700,
                                     fg_color="#334669", corner_radius=40)
-        self.home_frame.place(relx=0.5, y=220, anchor="n")
+        self.home_frame.place(relx=0.5, y=220, anchor="n")    
 
 
 app = App()
@@ -102,6 +103,7 @@ app = App()
 app_title = ctk.CTkLabel(app, text="Video Game Tracker",
                          font=("Arial", 70, "bold"))
 app_title.place(x=455, y=100)
+data = load_data()
 
 ctk.set_appearance_mode("light")
 app.mainloop()
