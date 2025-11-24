@@ -1,8 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
 from data import *
+from fonts import *
 import os
-
 
 class Game:
     def __init__(self, title, platform, status, rating=0, hours_played=0, imagePath=""):
@@ -77,7 +77,7 @@ class GameEntry(ctk.CTkFrame):
 
         # title text
         title_label = ctk.CTkLabel(title_frame, text=self.game.title,
-                                   font=("Arial", 16),
+                                   font=ENTRY_FONT(),
                                    text_color="#2C2C2C")
         title_label.pack(side=ctk.LEFT)
         status_color = self.get_status_color(self.game.status)
@@ -91,20 +91,20 @@ class GameEntry(ctk.CTkFrame):
             status_text = "WISHLISTED"
 
         status_label = ctk.CTkLabel(status_frame, text=status_text,
-                                    font=("Arial", 11, "bold"),
+                                    font=ENTRY_FONT(),
                                     text_color="white")
         status_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # Platform
         platform_label = ctk.CTkLabel(self, text=self.game.platform,
-                                      font=("Arial", 16),
+                                      font=ENTRY_FONT(),
                                       text_color="#2C2C2C")
         platform_label.grid(row=0, column=2, padx=20, pady=15, sticky="w")
 
         # Hours played
         hours_text = str(self.game.hours_played) if self.game.hours_played > 0 or self.game.status in ["ongoing", "completed"] else "--"
         hours_label = ctk.CTkLabel(self, text=hours_text,
-                                   font=("Arial", 16),
+                                   font=ENTRY_FONT(),
                                    text_color="#2C2C2C")
         hours_label.grid(row=0, column=3, padx=20, pady=15, sticky="w")
     
@@ -296,7 +296,8 @@ def open_new_window(master, title):
         # entry display
         for game in games:
             entry = GameEntry(scrollable_frame, game)
-            entry.pack(fill="x", pady=5, padx=10)
+            # entry.pack(fill="x", pady=5, padx=10)
+            entry.pack(fill="x", pady=5)
 
 
 class HomeFrame(ctk.CTkFrame):
@@ -304,14 +305,14 @@ class HomeFrame(ctk.CTkFrame):
         super().__init__(master, **kwargs)
 
         self.your_stats = ctk.CTkLabel(self, text="Your Stats",
-                                       font=("Arial", 48, "bold"),
+                                       font=HOME_FRAME_LARGE_FONT(),
                                        fg_color="#334669", text_color="white",
                                        anchor="w"
                                        )
         self.your_stats.place(relx=0.5, y=30, anchor="n")
 
         self.your_lists = ctk.CTkLabel(self, text="Your Lists",
-                                       font=("Arial", 48, "bold"),
+                                       font=HOME_FRAME_LARGE_FONT(),
                                        fg_color="#334669", text_color="white",
                                        anchor="w")
         self.your_lists.place(relx=0.5, y=475, anchor="n")
@@ -321,20 +322,20 @@ class HomeFrame(ctk.CTkFrame):
 
         self.registered_games = ctk.CTkLabel(self.stats_row,
                                              text="Games Registered",
-                                             font=("Arial", 22, "bold"),
+                                             font=HOME_FRAME_STATS_FONT(),
                                              fg_color="#334669",
                                              text_color="white")
         self.registered_games.pack(side=ctk.LEFT, padx=70)
 
         self.per_completed = ctk.CTkLabel(self.stats_row, text="% Completed",
-                                          font=("Arial", 22, "bold"),
+                                          font=HOME_FRAME_STATS_FONT(),
                                           fg_color="#334669",
                                           text_color="white")
         self.per_completed.pack(side=ctk.LEFT, padx=70)
 
         self.num_hours_played = ctk.CTkLabel(self.stats_row,
                                              text="Hours Played",
-                                             font=("Arial", 22, "bold"),
+                                             font=HOME_FRAME_STATS_FONT(),
                                              fg_color="#334669",
                                              text_color="white")
         self.num_hours_played.pack(side=ctk.LEFT, padx=70)
@@ -346,7 +347,7 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="All", width=100, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold"),
+            font=HOME_FRAME_SMALL_FONT(),
             command=lambda: open_new_window(self, "All Video Games")
         )
         self.all_button.pack(side=ctk.LEFT, padx=30)
@@ -355,7 +356,7 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Completed", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold"),
+            font=HOME_FRAME_SMALL_FONT(),
             command=lambda: open_new_window(self, "Completed Video Games")
         )
         self.completed_button.pack(side=ctk.LEFT, padx=30)
@@ -364,7 +365,7 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Ongoing", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold"),
+            font=HOME_FRAME_SMALL_FONT(),
             command=lambda: open_new_window(self, "Ongoing Video Games")
         )
         self.ongoing_button.pack(side=ctk.LEFT, padx=30)
@@ -373,7 +374,7 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Backlog", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold"),
+            font=HOME_FRAME_SMALL_FONT(),
             command=lambda: open_new_window(self, "Backlogged Video Games")
         )
         self.backlog_button.pack(side=ctk.LEFT, padx=30)
@@ -382,7 +383,7 @@ class HomeFrame(ctk.CTkFrame):
             self.button_row, text="Wishlist", width=90, height=70,
             fg_color="#5F7DB0", hover_color="#3D63A1",
             corner_radius=15, text_color="white",
-            font=("Arial", 24, "bold"),
+            font=HOME_FRAME_SMALL_FONT(),
             command=lambda: open_new_window(self, "Wishlisted Video Games")
         )
         self.wishlist_button.pack(side=ctk.LEFT, padx=30)
@@ -400,9 +401,8 @@ class App(ctk.CTk):
 
 
 app = App()
-
-app_title = ctk.CTkLabel(app, text="Video Game Tracker",
-                         font=("Arial", 70, "bold"))
+my_ctk_font = ctk.CTkFont(family="Roboto", size=14, weight="bold")
+app_title = ctk.CTkLabel(app, text="Video Game Tracker", font=VIDEO_GAME_TRACKER_FONT())
 app_title.place(x=455, y=100)
 
 ctk.set_appearance_mode("light")
