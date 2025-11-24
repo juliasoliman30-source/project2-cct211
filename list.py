@@ -5,13 +5,13 @@ import os
 
 
 class Game:
-    def __init__(self, title, platform, status, rating=0, review="", hours_played=0):
+    def __init__(self, title, platform, status, rating=0, hours_played=0, imagePath=""):
         self.title = title
         self.platform = platform
         self.status = status  # "completed", "ongoing", "backlog", "wishlist"
         self.rating = rating
-        self.review = review
         self.hours_played = hours_played
+        self.imagePath = imagePath
 
 
 class GameTracker:
@@ -33,7 +33,8 @@ class GameTracker:
                 platform=game_data.get("Platform", ""),
                 status=status,
                 rating=int(game_data.get("Rating", 0)),
-                hours_played=int(game_data.get("Hours", 0))
+                hours_played=int(game_data.get("Hours", 0)),
+                imagePath="pictures/" + game_data.get("ImagePath", "")
             )
             self.games.append(game)
 
@@ -72,15 +73,7 @@ class GameEntry(ctk.CTkFrame):
         # Game Title
         title_frame = ctk.CTkFrame(self, fg_color="transparent")
         title_frame.grid(row=0, column=0, padx=20, pady=15, sticky="w")
-        icon_path = self.get_game_icon(self.game.title)
-        if icon_path and os.path.exists(icon_path):
-            try:
-                icon_image = ctk.CTkImage(Image.open(icon_path), size=(30, 30))
-                icon_label = ctk.CTkLabel(title_frame, image=icon_image, text="")
-                icon_label.pack(side=ctk.LEFT, padx=(0, 10))
-                icon_label.image = icon_image
-            except Exception as e:
-                print(f"Error loading icon: {e}")
+        self.assign_image_icon(title_frame, self.game.imagePath)
 
         # title text
         title_label = ctk.CTkLabel(title_frame, text=self.game.title,
@@ -114,15 +107,20 @@ class GameEntry(ctk.CTkFrame):
                                    font=("Arial", 16),
                                    text_color="#2C2C2C")
         hours_label.grid(row=0, column=3, padx=20, pady=15, sticky="w")
+    
+    def assign_image_icon(self, parent, icon_path):
+        if not icon_path or not os.path.exists(icon_path):
+            icon_path = "pictures/defaultIcon.png"
 
-    def get_game_icon(self, game_title):
-        """Get the path to game cover art"""
-        icon_mapping = {
-            "Minecraft": "pictures/minecraft.png",
-            "The Legend of Zelda: BOTW": "pictures/botw.png",
-            "Elden Ring": "pictures/eldenring.png",
-        }
-        return icon_mapping.get(game_title, "")
+        try:
+            img = Image.open(icon_path)
+        except Exception:
+            img = Image.open("pictures/defaultIcon.png")
+
+        icon_image = ctk.CTkImage(img, size=(30,30))
+        label = ctk.CTkLabel(parent, image=icon_image, text="")
+        label.pack(side=ctk.LEFT, padx=(0, 10))
+        label.image = icon_image
 
     def get_status_color(self, status):
         """Return color for status badge"""
