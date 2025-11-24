@@ -89,6 +89,7 @@ class GameEntry(ctk.CTkFrame):
         self.grid_columnconfigure(1, weight=1, minsize=150)  # Status
         self.grid_columnconfigure(2, weight=1, minsize=150)  # Platform
         self.grid_columnconfigure(3, weight=1, minsize=150)  # Hours Played
+        self.grid_columnconfigure(4, weight=0, minsize=100)  # Actions
 
         # Game Title
         title_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -129,6 +130,22 @@ class GameEntry(ctk.CTkFrame):
                                    text_color="#2C2C2C")
         hours_label.grid(row=0, column=3, padx=20, pady=15, sticky="w")
 
+        # Action buttons
+        actions_frame = ctk.CTkFrame(self, fg_color="transparent")
+        actions_frame.grid(row=0, column=4, padx=20, pady=15, sticky="e")
+        
+        # edit button
+        edit_img = Image.open("pictures/edit_icon.png")
+        edit_icon = ctk.CTkImage(edit_img, size=(16, 16))
+        edit_button = ctk.CTkButton(actions_frame, image=edit_icon, text="", width=16, height=16, fg_color="transparent", hover=False, command=self.edit_game)
+        edit_button.pack(side=ctk.LEFT, padx=5)
+        
+        # delete button
+        delete_img = Image.open("pictures/delete_icon.png")
+        delete_icon = ctk.CTkImage(delete_img, size=(16, 16))
+        delete_button = ctk.CTkButton(actions_frame, image=delete_icon, text="", width=16, height=16, fg_color="transparent", hover=False, command=self.delete_game)
+        delete_button.pack(side=ctk.LEFT, padx=5)
+    
     def assign_image_icon(self, parent, icon_path):
         if not icon_path or not os.path.exists(icon_path):
             icon_path = "pictures/defaultIcon.png"
@@ -152,6 +169,18 @@ class GameEntry(ctk.CTkFrame):
             "wishlist": "#17A2B8"  # Teal
         }
         return colors.get(status, "#6C757D")
+
+    def edit_game(self):
+        """
+        Pop up a new window with a form that lets the user update the details of the game.
+        """
+        print(f"Edit game: {self.game.title}") #placeholda
+    
+    def delete_game(self):
+        """
+        Pop up a Yes/No window to confirm the user's delete action.
+        """
+        print(f"Delete game: {self.game.title}") # palceholda
 
 
 class ListPage(ctk.CTkFrame):
@@ -281,6 +310,7 @@ def open_new_window(master, title):
     header_frame.grid_columnconfigure(1, weight=1, minsize=150)  # Status
     header_frame.grid_columnconfigure(2, weight=1, minsize=150)  # Platform
     header_frame.grid_columnconfigure(3, weight=1, minsize=150)  # Hours Played
+    header_frame.grid_columnconfigure(4, weight=0, minsize=100)  # actions column?
 
     # labels for heardeer
     ctk.CTkLabel(header_frame, text="Title",
@@ -298,8 +328,12 @@ def open_new_window(master, title):
     ctk.CTkLabel(header_frame, text="Hours Played",
                  font=("Arial", 18, "bold"),
                  text_color="white").grid(row=0, column=3, padx=20, pady=15, sticky="w")
+    
+    ctk.CTkLabel(header_frame, text="Actions",
+                font=("Arial", 18, "bold"),
+                text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
 
-    # Scrollable thingy
+    # Scrollable thingy 
     scrollable_frame = ctk.CTkScrollableFrame(new_window, fg_color="transparent", width=900)
     scrollable_frame.pack(fill="both", expand=True, padx=50, pady=10)
 
