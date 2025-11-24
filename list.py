@@ -4,6 +4,7 @@ from data import *
 from fonts import *
 import os
 
+
 class Game:
     def __init__(self, title, platform, status, rating=0, hours_played=0, imagePath=""):
         self.title = title
@@ -54,6 +55,25 @@ class GameTracker:
             return self.games
         return [game for game in self.games if game.status == status]
 
+    def get_total_games(self):
+        """Get total number of games registered"""
+        return len(self.games)
+
+    def get_completed_percentage(self):
+        """Get percentage of completed games"""
+        if not self.games:
+            return 0
+        completed_count = len([game for game in self.games if game.status == "completed"])
+        return round((completed_count / len(self.games)) * 100)
+
+    def get_total_hours_played(self):
+        """Get total hours played across all games"""
+        return sum(game.hours_played for game in self.games if game.hours_played > 0)
+
+    def get_games_by_status_count(self, status):
+        """Get count of games by status"""
+        return len([game for game in self.games if game.status == status])
+
 
 class GameEntry(ctk.CTkFrame):
     def __init__(self, master, game, **kwargs):
@@ -64,7 +84,7 @@ class GameEntry(ctk.CTkFrame):
         self.setup_entry()
 
     def setup_entry(self):
-        # Configure grid layout 
+        # Configure grid layout
         self.grid_columnconfigure(0, weight=2, minsize=300)  # Title
         self.grid_columnconfigure(1, weight=1, minsize=150)  # Status
         self.grid_columnconfigure(2, weight=1, minsize=150)  # Platform
@@ -82,7 +102,7 @@ class GameEntry(ctk.CTkFrame):
         title_label.pack(side=ctk.LEFT)
         status_color = self.get_status_color(self.game.status)
         status_frame = ctk.CTkFrame(self, fg_color=status_color,
-                                    corner_radius=12, width=120, height=25)
+                                    corner_radius=12, width=120, height=24)
         status_frame.grid(row=0, column=1, padx=20, pady=17)
         status_frame.grid_propagate(False)
 
@@ -102,12 +122,13 @@ class GameEntry(ctk.CTkFrame):
         platform_label.grid(row=0, column=2, padx=20, pady=15, sticky="w")
 
         # Hours played
-        hours_text = str(self.game.hours_played) if self.game.hours_played > 0 or self.game.status in ["ongoing", "completed"] else "--"
+        hours_text = str(self.game.hours_played) if self.game.hours_played > 0 or self.game.status in ["ongoing",
+                                                                                                       "completed"] else "--"
         hours_label = ctk.CTkLabel(self, text=hours_text,
                                    font=ENTRY_FONT(),
                                    text_color="#2C2C2C")
         hours_label.grid(row=0, column=3, padx=20, pady=15, sticky="w")
-    
+
     def assign_image_icon(self, parent, icon_path):
         if not icon_path or not os.path.exists(icon_path):
             icon_path = "pictures/defaultIcon.png"
@@ -117,7 +138,7 @@ class GameEntry(ctk.CTkFrame):
         except Exception:
             img = Image.open("pictures/defaultIcon.png")
 
-        icon_image = ctk.CTkImage(img, size=(30,30))
+        icon_image = ctk.CTkImage(img, size=(30, 30))
         label = ctk.CTkLabel(parent, image=icon_image, text="")
         label.pack(side=ctk.LEFT, padx=(0, 10))
         label.image = icon_image
@@ -144,7 +165,7 @@ class ListPage(ctk.CTkFrame):
         self.load_games()
 
     def setup_ui(self):
-        # title Page 
+        # title Page
         title_text = f"{self.status.upper()}" if self.status != "all" else "ALL GAMES"
         self.title_label = ctk.CTkLabel(self, text=title_text,
                                         font=("Arial", 48, "bold"),
@@ -173,13 +194,13 @@ class ListPage(ctk.CTkFrame):
         header_frame.pack(fill="x", pady=(0, 10), padx=50)
         header_frame.pack_propagate(False)
 
-        # Configure header grid columns
+        # configure header grid columns
         header_frame.grid_columnconfigure(0, weight=2, minsize=300)  # Title
         header_frame.grid_columnconfigure(1, weight=1, minsize=150)  # Status
         header_frame.grid_columnconfigure(2, weight=1, minsize=150)  # Platform
         header_frame.grid_columnconfigure(3, weight=1, minsize=150)  # Hours Played
 
-        # Header labels
+        # header labels
         ctk.CTkLabel(header_frame, text="Title",
                      font=("Arial", 18, "bold"),
                      text_color="white").grid(row=0, column=0, padx=20, pady=15, sticky="w")
@@ -209,7 +230,7 @@ class ListPage(ctk.CTkFrame):
             empty_label.pack(pady=50)
             return
 
-        # Display each game as an individual entry
+        # Display each game as individual entry
         for game in games:
             entry = GameEntry(self.scrollable_frame, game)
             entry.pack(fill="x", pady=5, padx=10)
@@ -221,7 +242,7 @@ def open_new_window(master, title):
     new_window.geometry("1200x1000")
     new_window.configure(fg_color="#334669")
 
-    # Extract status from title 
+    # status from title
     status_map = {
         "All Video Games": "all",
         "Completed Video Games": "completed",
@@ -278,22 +299,20 @@ def open_new_window(master, title):
                  font=("Arial", 18, "bold"),
                  text_color="white").grid(row=0, column=3, padx=20, pady=15, sticky="w")
 
-    # Scrollable thingy 
+    # Scrollable thingy
     scrollable_frame = ctk.CTkScrollableFrame(new_window, fg_color="transparent", width=900)
     scrollable_frame.pack(fill="both", expand=True, padx=50, pady=10)
 
-    # 
+    #
     games = tracker.get_games_by_status(status)
 
     if not games:
-        # Show empty state message
         empty_label = ctk.CTkLabel(scrollable_frame,
                                    text=f"No {status} games found.\nClick 'Add Game' to get started!",
                                    font=("Arial", 24),
                                    text_color="white")
         empty_label.pack(pady=50)
     else:
-        # entry display
         for game in games:
             entry = GameEntry(scrollable_frame, game)
             # entry.pack(fill="x", pady=5, padx=10)
@@ -303,20 +322,19 @@ def open_new_window(master, title):
 class HomeFrame(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+        self.tracker = GameTracker()  # Add tracker instance
 
+        self.setup_ui()
+        self.update_stats()
+
+    def setup_ui(self):
         self.your_stats = ctk.CTkLabel(self, text="Your Stats",
                                        font=HOME_FRAME_LARGE_FONT(),
                                        fg_color="#334669", text_color="white",
-                                       anchor="w"
-                                       )
+                                       anchor="w")
         self.your_stats.place(relx=0.5, y=30, anchor="n")
 
-        self.your_lists = ctk.CTkLabel(self, text="Your Lists",
-                                       font=HOME_FRAME_LARGE_FONT(),
-                                       fg_color="#334669", text_color="white",
-                                       anchor="w")
-        self.your_lists.place(relx=0.5, y=475, anchor="n")
-
+        # Stats values
         self.stats_row = ctk.CTkFrame(self, fg_color="transparent")
         self.stats_row.place(relx=0.5, y=125, anchor="n")
 
@@ -340,8 +358,45 @@ class HomeFrame(ctk.CTkFrame):
                                              text_color="white")
         self.num_hours_played.pack(side=ctk.LEFT, padx=70)
 
+        # more stats values
+        self.stats_values_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.stats_values_frame.place(relx=0.5, y=180, anchor="n")
+
+        self.games_count = ctk.CTkLabel(self.stats_values_frame,
+                                        text="0",
+                                        font=("Arial", 32, "bold"),
+                                        text_color="white")
+        self.games_count.pack(side=ctk.LEFT, padx=85)
+
+        self.percent_completed = ctk.CTkLabel(self.stats_values_frame,
+                                              text="0%",
+                                              font=("Arial", 32, "bold"),
+                                              text_color="white")
+        self.percent_completed.pack(side=ctk.LEFT, padx=85)
+
+        self.hours_count = ctk.CTkLabel(self.stats_values_frame,
+                                        text="0",
+                                        font=("Arial", 32, "bold"),
+                                        text_color="white")
+        self.hours_count.pack(side=ctk.LEFT, padx=85)
+
+        self.your_lists = ctk.CTkLabel(self, text="Your Lists",
+                                       font=HOME_FRAME_LARGE_FONT(),
+                                       fg_color="#334669", text_color="white",
+                                       anchor="w")
+        self.your_lists.place(relx=0.5, y=280, anchor="n")  # Moved up since no breakdown
+
+        #Game Button
+        self.add_button = ctk.CTkButton(self, text="+ Add Game",
+                                        width=200, height=50,
+                                        fg_color="#5F7DB0", hover_color="#3D63A1",
+                                        corner_radius=15, text_color="white",
+                                        font=("Arial", 20, "bold"))
+        self.add_button.place(relx=0.5, y=380, anchor="n")  # Adjusted position
+
+        # List buttons (moved down)
         self.button_row = ctk.CTkFrame(self, fg_color="transparent")
-        self.button_row.place(relx=0.5, y=570, anchor="n")
+        self.button_row.place(relx=0.5, y=450, anchor="n")  # Moved down from 570
 
         self.all_button = ctk.CTkButton(
             self.button_row, text="All", width=100, height=70,
@@ -388,6 +443,17 @@ class HomeFrame(ctk.CTkFrame):
         )
         self.wishlist_button.pack(side=ctk.LEFT, padx=30)
 
+    def update_stats(self):
+        total_games = self.tracker.get_total_games()
+        completed_percent = self.tracker.get_completed_percentage()
+        total_hours = self.tracker.get_total_hours_played()
+
+        # Update main stats
+        self.games_count.configure(text=str(total_games))
+        self.percent_completed.configure(text=f"{completed_percent}%")
+        self.hours_count.configure(text=str(total_hours))
+
+
 
 class App(ctk.CTk):
     def __init__(self):
@@ -395,10 +461,15 @@ class App(ctk.CTk):
         self.geometry("1200x1000")
         self.title("CCT211: Video Game Tracker")
 
+        self.tracker = GameTracker()  # Create tracker instance
+
         self.home_frame = HomeFrame(master=self, width=1100, height=700,
                                     fg_color="#334669", corner_radius=40)
         self.home_frame.place(relx=0.5, y=220, anchor="n")
 
+    def refresh_stats(self):
+        self.tracker.load_from_csv()  # Reload data from CSV
+        self.update_stats()  # Update the display
 
 app = App()
 my_ctk_font = ctk.CTkFont(family="Roboto", size=14, weight="bold")
@@ -407,3 +478,4 @@ app_title.place(x=455, y=100)
 
 ctk.set_appearance_mode("light")
 app.mainloop()
+
