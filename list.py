@@ -17,6 +17,7 @@ class Game:
         self.hours_played = hours_played
         self.imagePath = imagePath
 
+
 class GameTracker:
     def __init__(self):
         self.games = []
@@ -75,13 +76,14 @@ class GameTracker:
     def get_games_by_status_count(self, status):
         """Get count of games by status"""
         return len([game for game in self.games if game.status == status])
-    
+
     def add_game(self, title, platform, status, hours, rating, imagePath=""):
         """
         Add the given entry to the current games list and write it to the csv file.
         """
         newId = generate_unique_id(self.raw_csv_data)
-        newEntry = {"ID": newId, "Title": title, "Platform": platform, "Status": status, "Hours": hours, "Rating": rating, "ImagePath": imagePath}
+        newEntry = {"ID": newId, "Title": title, "Platform": platform, "Status": status, "Hours": hours,
+                    "Rating": rating, "ImagePath": imagePath}
         self.raw_csv_data.append(newEntry)
         newGame = Game(
             id=newEntry.get("ID", ""),
@@ -91,7 +93,7 @@ class GameTracker:
             rating=int(newEntry.get("Rating", 0)),
             hours_played=int(newEntry.get("Hours", 0)),
             imagePath=newEntry.get("ImagePath", "")
-            )
+        )
         self.games.append(newGame)
         write_data_to_csv(self.raw_csv_data)
 
@@ -122,26 +124,36 @@ class GameEntry(ctk.CTkFrame):
                                    font=ENTRY_FONT(),
                                    text_color="#2C2C2C")
         title_label.pack(side=ctk.LEFT)
-        status_color = self.get_status_color(self.game.status)
-        status_frame = ctk.CTkFrame(self, fg_color=status_color,
-                                    corner_radius=12, width=120, height=24)
-        status_frame.grid(row=0, column=1, padx=20, pady=17)
-        status_frame.grid_propagate(False)
 
+        # Status
+        status_color = self.get_status_color(self.game.status)
         status_text = self.game.status.upper()
         if status_text == "WISHLIST":
             status_text = "WISHLISTED"
 
-        status_label = ctk.CTkLabel(status_frame, text=status_text,
+        status_label = ctk.CTkLabel(self, text=status_text,
                                     font=ENTRY_FONT(),
-                                    text_color="white")
-        status_label.place(relx=0.5, rely=0.5, anchor="center")
+                                    text_color="white",
+                                    fg_color=status_color,
+                                    corner_radius=12)
+        status_label.grid(row=0, column=1, padx=20, pady=15, sticky="w")
 
         # Platform
-        platform_label = ctk.CTkLabel(self, text=self.game.platform,
-                                      font=ENTRY_FONT(),
-                                      text_color="#2C2C2C")
-        platform_label.grid(row=0, column=2, padx=20, pady=15, sticky="w")
+        platform_frame = ctk.CTkFrame(self, fg_color="transparent")
+        platform_frame.grid(
+            row=0, column=2,
+            padx=(30, 0),  # <– change this number to nudge left/right
+            pady=15,
+            sticky="nsew"
+        )
+
+        platform_label = ctk.CTkLabel(
+            platform_frame,
+            text=self.game.platform,
+            font=ENTRY_FONT(),
+            text_color="#2C2C2C"
+        )
+        platform_label.pack(anchor="center")
 
         # Hours played
         hours_text = str(self.game.hours_played) if self.game.hours_played > 0 or self.game.status in ["ongoing",
@@ -149,24 +161,31 @@ class GameEntry(ctk.CTkFrame):
         hours_label = ctk.CTkLabel(self, text=hours_text,
                                    font=ENTRY_FONT(),
                                    text_color="#2C2C2C")
-        hours_label.grid(row=0, column=3, padx=20, pady=15, sticky="w")
+        hours_label.grid(
+            row=0, column=3,
+            padx=(80, 0),  # <-- manually shift number left/right
+            pady=15,
+            sticky="w"
+        )
 
         # Action buttons
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
         actions_frame.grid(row=0, column=4, padx=20, pady=15, sticky="e")
-        
+
         # edit button
         edit_img = Image.open("pictures/edit_icon.png")
         edit_icon = ctk.CTkImage(edit_img, size=(16, 16))
-        edit_button = ctk.CTkButton(actions_frame, image=edit_icon, text="", width=16, height=16, fg_color="transparent", hover=False, command=self.edit_game)
+        edit_button = ctk.CTkButton(actions_frame, image=edit_icon, text="", width=16, height=16,
+                                    fg_color="transparent", hover=False, command=self.edit_game)
         edit_button.pack(side=ctk.LEFT, padx=5)
-        
+
         # delete button
         delete_img = Image.open("pictures/delete_icon.png")
         delete_icon = ctk.CTkImage(delete_img, size=(16, 16))
-        delete_button = ctk.CTkButton(actions_frame, image=delete_icon, text="", width=16, height=16, fg_color="transparent", hover=False, command=self.delete_game)
+        delete_button = ctk.CTkButton(actions_frame, image=delete_icon, text="", width=16, height=16,
+                                      fg_color="transparent", hover=False, command=self.delete_game)
         delete_button.pack(side=ctk.LEFT, padx=5)
-    
+
     def assign_image_icon(self, parent, icon_path):
         if not icon_path or not os.path.exists(icon_path):
             icon_path = "pictures/defaultIcon.png"
@@ -195,13 +214,13 @@ class GameEntry(ctk.CTkFrame):
         """
         Pop up a new window with a form that lets the user update the details of the game.
         """
-        print(f"Edit game: {self.game.title}") #placeholda
-    
+        print(f"Edit game: {self.game.title}")  # placeholda
+
     def delete_game(self):
         """
         Pop up a Yes/No window to confirm the user's delete action.
         """
-        print(f"Delete game: {self.game.title}") # palceholda
+        print(f"Delete game: {self.game.title}")  # palceholda
 
 
 class ListPage(ctk.CTkFrame):
@@ -234,9 +253,10 @@ class ListPage(ctk.CTkFrame):
         # Table header
         self.create_table_header()
 
-        # Scroll thingy for game entries
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", width=900)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=50, pady=10)
+        # Create both frame types but don't pack yet
+        self.regular_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", width=900,
+                                                       height=200)  # Fixed height
 
     def create_table_header(self):
         """Create the table header with column titles"""
@@ -249,6 +269,7 @@ class ListPage(ctk.CTkFrame):
         header_frame.grid_columnconfigure(1, weight=1, minsize=150)  # Status
         header_frame.grid_columnconfigure(2, weight=1, minsize=150)  # Platform
         header_frame.grid_columnconfigure(3, weight=1, minsize=150)  # Hours Played
+        header_frame.grid_columnconfigure(4, weight=0, minsize=150)  # Actions
 
         # header labels
         ctk.CTkLabel(header_frame, text="Title",
@@ -261,29 +282,48 @@ class ListPage(ctk.CTkFrame):
 
         ctk.CTkLabel(header_frame, text="Platform",
                      font=("Arial", 18, "bold"),
-                     text_color="white").grid(row=0, column=2, padx=20, pady=15, sticky="w")
+                     text_color="white").grid(row=0, column=2, padx=(30, 0), pady=15, sticky="w")
 
         ctk.CTkLabel(header_frame, text="Hours Played",
                      font=("Arial", 18, "bold"),
-                     text_color="white").grid(row=0, column=3, padx=20, pady=15, sticky="w")
+                     text_color="white").grid(
+            row=0, column=3,
+            padx=0, pady=15,
+            sticky="nsew"  # center
+        )
+
+        ctk.CTkLabel(header_frame, text="Actions",
+                     font=("Arial", 18, "bold"),
+                     text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
 
     def load_games(self):
         """Load and display games as individual entries"""
         games = self.tracker.get_games_by_status(self.status)
 
+        if len(games) <= 3:
+            # Use regular frame (no scrollbar) for 3 or fewer entries
+            self.regular_frame.pack(fill="x", padx=50, pady=10)  # Only fill horizontally
+            content_frame = self.regular_frame
+        else:
+            #scrollable frame for more than 3 entries - height based on content
+            content_height = min(len(games) * 70, 250)
+            self.scrollable_frame.configure(height=content_height)
+            self.scrollable_frame.pack(fill="x", padx=50, pady=10)  # Only fill horizontally
+            content_frame = self.scrollable_frame
+
         if not games:
             # Show empty state message
-            empty_label = ctk.CTkLabel(self.scrollable_frame,
+            empty_label = ctk.CTkLabel(content_frame,
                                        text=f"No {self.status} games found.\nClick 'Add Game' to get started!",
                                        font=("Arial", 24),
                                        text_color="white")
             empty_label.pack(pady=50)
             return
 
-        # Display each game as individual entry
+        #each game as individual entry
         for game in games:
-            entry = GameEntry(self.scrollable_frame, game)
-            entry.pack(fill="x", pady=5, padx=10)
+            entry = GameEntry(content_frame, game)
+            entry.pack(fill="x", pady=5, padx=50)
 
 
 def open_new_window(master, title):
@@ -349,28 +389,39 @@ def open_new_window(master, title):
     ctk.CTkLabel(header_frame, text="Hours Played",
                  font=("Arial", 18, "bold"),
                  text_color="white").grid(row=0, column=3, padx=20, pady=15, sticky="w")
-    
-    ctk.CTkLabel(header_frame, text="Actions",
-                font=("Arial", 18, "bold"),
-                text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
 
-    # Scrollable thingy 
+    ctk.CTkLabel(header_frame, text="Actions",
+                 font=("Arial", 18, "bold"),
+                 text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
+
+    # Create both frame types but don't pack yet
+    regular_frame = ctk.CTkFrame(new_window, fg_color="transparent")
     scrollable_frame = ctk.CTkScrollableFrame(new_window, fg_color="transparent", width=900)
-    scrollable_frame.pack(fill="both", expand=True, padx=50, pady=10)
 
     games = tracker.get_games_by_status(status)
 
+    if len(games) <= 3:
+        # Use regular frame (no scrollbar) for 3 or fewer entries
+        regular_frame.pack(fill="x", padx=50, pady=10)  # Only fill horizontally
+        content_frame = regular_frame
+    else:
+        # Use scrollable frame for more than 3 entries -  height based on content
+        content_height = min(len(games) * 70, 300)
+        scrollable_frame.configure(height=content_height)
+        scrollable_frame.pack(fill="x", padx=50, pady=10)
+        content_frame = scrollable_frame
+
     if not games:
-        empty_label = ctk.CTkLabel(scrollable_frame,
+        empty_label = ctk.CTkLabel(content_frame,
                                    text=f"No {status} games found.\nClick 'Add Game' to get started!",
                                    font=("Arial", 24),
                                    text_color="white")
         empty_label.pack(pady=50)
     else:
         for game in games:
-            entry = GameEntry(scrollable_frame, game)
-            # entry.pack(fill="x", pady=5, padx=10)
+            entry = GameEntry(content_frame, game)
             entry.pack(fill="x", pady=5)
+
 
 def update_rating(curr_rating, given_rating, stars_list, empty_star_icon, filled_star_icon):
     """
@@ -382,6 +433,7 @@ def update_rating(curr_rating, given_rating, stars_list, empty_star_icon, filled
             stars_list[i].configure(image=filled_star_icon)
         else:
             stars_list[i].configure(image=empty_star_icon)
+
 
 def only_nonnegatives(value):
     """
@@ -396,10 +448,10 @@ def only_nonnegatives(value):
         else:
             return False
     except ValueError:
-        # If casting to float fails (e.g., non-numeric chars), validation fails
         return False
-    
-def on_status_change(hours_entry ,choice):
+
+
+def on_status_change(hours_entry, choice):
     """
     Enables the hours played field when the user selects 'Ongoing' or 'Completed'.
     Disables it otherwise.
@@ -412,11 +464,12 @@ def on_status_change(hours_entry ,choice):
         hours_entry.insert(0, "0")
         hours_entry.configure(state="disabled")
 
+
 def select_image(curr_image_path, image_label):
     """
     Keeps track of the image path the user selected
     """
-    filepath = filedialog.askopenfilename(title="Select Game Icon",filetypes=[("Image files", "*.png *.jpg *.jpeg")])
+    filepath = filedialog.askopenfilename(title="Select Game Icon", filetypes=[("Image files", "*.png *.jpg *.jpeg")])
     if filepath:
         curr_image_path["path"] = filepath
         filename = os.path.basename(filepath)
@@ -424,11 +477,12 @@ def select_image(curr_image_path, image_label):
             filename = filename[:27] + "..."
         image_label.configure(text=f"Selected: {filename}")
 
+
 def save_form(window, master, tracker, error_label, title, platform, status, rating, hours, imagePath):
     """
     Validates the input of the form and properly saves the entry and the image to the pictures folder.
     After that, refreshes the UI on the home page to reflect the changes.
-    """            
+    """
     if not title or not platform or not status:
         error_label.configure(text="Please enter all mandatory fields")
         return
@@ -441,6 +495,7 @@ def save_form(window, master, tracker, error_label, title, platform, status, rat
     master.update_stats()
     window.destroy()
 
+
 def open_add_game_window(master, masterTracker):
     """
     Pop up a new window with a form that lets the user add a new game entry.
@@ -452,51 +507,62 @@ def open_add_game_window(master, masterTracker):
     new_window.grab_set()
 
     # form title
-    ctk.CTkLabel(new_window, text="Add A New Game!", font=("Arial", 32, "bold"),text_color="white").pack(pady=30)
+    ctk.CTkLabel(new_window, text="Add A New Game!", font=("Arial", 32, "bold"), text_color="white").pack(pady=30)
 
     # form container
     form_frame = ctk.CTkFrame(new_window, fg_color="#95A6C8", corner_radius=15)
-    form_frame.pack(pady=(10,0), fill="both", expand=True)
+    form_frame.pack(pady=(10, 0), fill="both", expand=True)
 
     # title field
-    ctk.CTkLabel(form_frame, text="Title *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(20, 5), padx=20, anchor="w")
+    ctk.CTkLabel(form_frame, text="Title *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(20, 5), padx=20,
+                                                                                                  anchor="w")
     title_entry = ctk.CTkEntry(form_frame, width=500, height=40, placeholder_text="Enter game title")
     title_entry.pack(padx=20)
 
     # platform field
-    ctk.CTkLabel(form_frame, text="Platform *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(15, 5), padx=20, anchor="w")
+    ctk.CTkLabel(form_frame, text="Platform *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(15, 5),
+                                                                                                     padx=20,
+                                                                                                     anchor="w")
     platform_entry = ctk.CTkEntry(form_frame, width=500, height=40, placeholder_text="e.g., PC, Switch, PS5")
     platform_entry.pack(padx=20)
 
     # status and hours played frame
     status_hours_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
     status_hours_frame.pack(padx=20, pady=(15, 5), fill="x")
-    
-    status_hours_frame.grid_columnconfigure(0, weight=0) # status label
-    status_hours_frame.grid_columnconfigure(1, weight=1) # status dropdown
-    status_hours_frame.grid_columnconfigure(2, weight=0) # Hours label
-    status_hours_frame.grid_columnconfigure(3, weight=1) # Hours entry
-    
+
+    status_hours_frame.grid_columnconfigure(0, weight=0)  # status label
+    status_hours_frame.grid_columnconfigure(1, weight=1)  # status dropdown
+    status_hours_frame.grid_columnconfigure(2, weight=0)  # Hours label
+    status_hours_frame.grid_columnconfigure(3, weight=1)  # Hours entry
+
     # status label
-    ctk.CTkLabel(status_hours_frame, text="Status *", font=("Arial", 16, "bold"), text_color="white").grid(row=0, column=0, sticky="w", padx=(0, 10))
-    
+    ctk.CTkLabel(status_hours_frame, text="Status *", font=("Arial", 16, "bold"), text_color="white").grid(row=0,
+                                                                                                           column=0,
+                                                                                                           sticky="w",
+                                                                                                           padx=(0, 10))
+
     # dropdown
     status_options = ["Ongoing", "Completed", "Backlog", "Wishlisted"]
     status_dropdown = ctk.CTkComboBox(status_hours_frame, width=200, height=40, values=status_options, state="readonly")
     # status_dropdown.set("...")
     status_dropdown.grid(row=0, column=1, sticky="ew", padx=20)
-    
+
     # hours label
-    ctk.CTkLabel(status_hours_frame, text="Hours Played", font=("Arial", 16, "bold"), text_color="white").grid(row=0, column=2, sticky="w", padx=(0, 10))
-    
+    ctk.CTkLabel(status_hours_frame, text="Hours Played", font=("Arial", 16, "bold"), text_color="white").grid(row=0,
+                                                                                                               column=2,
+                                                                                                               sticky="w",
+                                                                                                               padx=(0,
+                                                                                                                     10))
+
     vcmd = (new_window.register(only_nonnegatives), "%P")
 
     # Hours entry
-    hours_entry = ctk.CTkEntry(status_hours_frame, width=200, height=40, placeholder_text="0", validate="key", validatecommand=vcmd)
+    hours_entry = ctk.CTkEntry(status_hours_frame, width=200, height=40, placeholder_text="0", validate="key",
+                               validatecommand=vcmd)
     hours_entry.insert(0, "0")
     hours_entry.configure(state="disabled")
     hours_entry.grid(row=0, column=3, sticky="ew")
-    
+
     status_dropdown.configure(command=lambda choice: on_status_change(hours_entry, choice))
 
     # current rating state
@@ -505,13 +571,14 @@ def open_add_game_window(master, masterTracker):
     # ratings frame
     ratings_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
     ratings_frame.pack(padx=20, pady=15, fill="x")
-    
+
     ratings_frame.grid_columnconfigure(0, weight=0)
     ratings_frame.grid_columnconfigure(1, weight=1)
     ratings_frame.grid_columnconfigure(2, weight=0)
 
     # ratings label
-    ctk.CTkLabel(ratings_frame, text="Ratings", font=("Arial", 16, "bold"), text_color="white").grid(row=0, column=0, sticky="w")
+    ctk.CTkLabel(ratings_frame, text="Ratings", font=("Arial", 16, "bold"), text_color="white").grid(row=0, column=0,
+                                                                                                     sticky="w")
 
     empty_star_img = Image.open("pictures/empty_star.png")
     filled_star_img = Image.open("pictures/filled_star.png")
@@ -521,48 +588,63 @@ def open_add_game_window(master, masterTracker):
     # stars and button container
     stars_button_container = ctk.CTkFrame(ratings_frame, fg_color="transparent")
     stars_button_container.grid(row=0, column=2, sticky="e")
-    
+
     stars_list = []
     for i in range(5):
         star_label = ctk.CTkLabel(stars_button_container, image=empty_star_icon, text="")
         star_label.pack(side=ctk.LEFT, padx=5)
-        star_label.bind("<Button-1>", lambda e, index=i: update_rating(curr_rating, index + 1, stars_list, empty_star_icon, filled_star_icon))
+        star_label.bind("<Button-1>",
+                        lambda e, index=i: update_rating(curr_rating, index + 1, stars_list, empty_star_icon,
+                                                         filled_star_icon))
         stars_list.append(star_label)
 
     # reset button
-    reset_button = ctk.CTkButton(stars_button_container, text="Reset", width=60, height=30, fg_color="#3B5469", hover_color="#5A6268", font=("Arial", 12), command=lambda: update_rating(curr_rating, 0, stars_list, empty_star_icon, filled_star_icon))
+    reset_button = ctk.CTkButton(stars_button_container, text="Reset", width=60, height=30, fg_color="#3B5469",
+                                 hover_color="#5A6268", font=("Arial", 12),
+                                 command=lambda: update_rating(curr_rating, 0, stars_list, empty_star_icon,
+                                                               filled_star_icon))
     reset_button.pack(side=ctk.LEFT, padx=15)
 
-    ctk.CTkLabel(form_frame, text="Game Icon (.png, .jpg, .jpeg files)", font=("Arial", 16, "bold"), text_color="white").pack(pady=(15, 5), padx=20, anchor="w")
-    
+    ctk.CTkLabel(form_frame, text="Game Icon (.png, .jpg, .jpeg files)", font=("Arial", 16, "bold"),
+                 text_color="white").pack(pady=(15, 5), padx=20, anchor="w")
+
     curr_image_path = {"path": ""}
-    
+
     image_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
     image_frame.pack(padx=20, pady=(4, 10))
-    
+
     selected_image_label = ctk.CTkLabel(image_frame, text="No image selected", text_color="white", font=("Arial", 14))
     selected_image_label.pack(side=ctk.LEFT, padx=(0, 10))
-    
-    browse_button = ctk.CTkButton(image_frame, text="Browse", width=100, height=35, fg_color="#3D63A1", hover_color="#2E4C7C", font=("Arial", 14), command=lambda: select_image(curr_image_path, selected_image_label))
+
+    browse_button = ctk.CTkButton(image_frame, text="Browse", width=100, height=35, fg_color="#3D63A1",
+                                  hover_color="#2E4C7C", font=("Arial", 14),
+                                  command=lambda: select_image(curr_image_path, selected_image_label))
     browse_button.pack(side=ctk.LEFT)
 
-    error_label = ctk.CTkLabel(form_frame, text="", text_color="#F54646",font=("Arial", 16))
+    error_label = ctk.CTkLabel(form_frame, text="", text_color="#F54646", font=("Arial", 16))
     error_label.pack(pady=(10, 0))
 
     # save and cancel button frame
     buttons_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
     buttons_frame.pack(pady=20)
 
-    save_button = ctk.CTkButton(buttons_frame, text="Save", width=150, height=40, fg_color="#28A745", hover_color="#218838", font=("Arial", 16, "bold"), command=lambda: save_form(new_window, master, masterTracker, error_label, title_entry.get(), platform_entry.get(), status_dropdown.get(), curr_rating["value"], hours_entry.get(), curr_image_path["path"]))
+    save_button = ctk.CTkButton(buttons_frame, text="Save", width=150, height=40, fg_color="#28A745",
+                                hover_color="#218838", font=("Arial", 16, "bold"),
+                                command=lambda: save_form(new_window, master, masterTracker, error_label,
+                                                          title_entry.get(), platform_entry.get(),
+                                                          status_dropdown.get(), curr_rating["value"],
+                                                          hours_entry.get(), curr_image_path["path"]))
     save_button.pack(side=ctk.LEFT, padx=10)
-    
-    cancel_button = ctk.CTkButton(buttons_frame, text="Cancel", width=150, height=40, fg_color="#6C757D", hover_color="#5A6268", font=("Arial", 16, "bold"), command=new_window.destroy)
+
+    cancel_button = ctk.CTkButton(buttons_frame, text="Cancel", width=150, height=40, fg_color="#6C757D",
+                                  hover_color="#5A6268", font=("Arial", 16, "bold"), command=new_window.destroy)
     cancel_button.pack(side=ctk.LEFT, padx=10)
+
 
 class HomeFrame(ctk.CTkFrame):
     def __init__(self, master, tracker, **kwargs):
         super().__init__(master, **kwargs)
-        self.tracker = tracker 
+        self.tracker = tracker
         self.setup_ui()
         self.update_stats()
 
@@ -625,7 +707,7 @@ class HomeFrame(ctk.CTkFrame):
                                        anchor="w")
         self.your_lists.place(relx=0.5, y=280, anchor="n")  # Moved up since no breakdown
 
-        #Game Button
+        # Game Button
         self.add_button = ctk.CTkButton(self, text="+ Add Game",
                                         width=200, height=50,
                                         fg_color="#5F7DB0", hover_color="#3D63A1",
@@ -634,9 +716,9 @@ class HomeFrame(ctk.CTkFrame):
                                         command=lambda: open_add_game_window(self, self.tracker))
         self.add_button.place(relx=0.5, y=380, anchor="n")  # Adjusted position
 
-        # List buttons (moved down)
+        # List buttons
         self.button_row = ctk.CTkFrame(self, fg_color="transparent")
-        self.button_row.place(relx=0.5, y=450, anchor="n")  # Moved down from 570
+        self.button_row.place(relx=0.5, y=450, anchor="n")
 
         self.all_button = ctk.CTkButton(
             self.button_row, text="All", width=100, height=70,
@@ -693,20 +775,22 @@ class HomeFrame(ctk.CTkFrame):
         self.percent_completed.configure(text=f"{completed_percent}%")
         self.hours_count.configure(text=str(total_hours))
 
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.geometry("1200x1000")
         self.title("CCT211: Video Game Tracker")
 
-        self.tracker = GameTracker()  # Create tracker instance
+        self.tracker = GameTracker()
 
-        self.home_frame = HomeFrame(master=self, tracker=self.tracker, width=1100, height=700, fg_color="#334669", corner_radius=40)
+        self.home_frame = HomeFrame(master=self, tracker=self.tracker, width=1100, height=700, fg_color="#334669",
+                                    corner_radius=40)
         self.home_frame.place(relx=0.5, y=220, anchor="n")
 
     def refresh_stats(self):
         self.tracker.create_games()
-        self.update_stats()  # Update the display
+        self.update_stats()  # Update
 
 app = App()
 my_ctk_font = ctk.CTkFont(family="Roboto", size=14, weight="bold")
@@ -715,4 +799,3 @@ app_title.place(x=455, y=100)
 
 ctk.set_appearance_mode("light")
 app.mainloop()
-
