@@ -298,9 +298,10 @@ class GameEntry(ctk.CTkFrame):
         ctk.CTkLabel(form_frame, text="Title *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(20, 5),
                                                                                                       padx=20,
                                                                                                       anchor="w")
-        title_entry = ctk.CTkEntry(form_frame, width=500, height=40, placeholder_text="Enter game title")
-        title_entry.insert(0, self.game.title)
+        title_entry = ctk.CTkEntry(form_frame, width=500, height=40, placeholder_text="Enter game title",
+                                   fg_color="#C0C0C0", state="readonly", text_color="white")
         title_entry.pack(padx=20)
+        title_entry.insert(0, self.game.title)
 
         # platform field
         ctk.CTkLabel(form_frame, text="Platform *", font=("Arial", 16, "bold"), text_color="white").pack(pady=(15, 5),
@@ -350,7 +351,7 @@ class GameEntry(ctk.CTkFrame):
 
         # hours entry
         hours_entry = ctk.CTkEntry(status_hours_frame, width=200, height=40, placeholder_text="0", validate="key",
-                                   validatecommand=vcmd)
+                                   fg_color="#C0C0C0", validatecommand=vcmd)
         hours_entry.insert(0, "0")
         hours_entry.configure(state="disabled")
         hours_entry.grid(row=0, column=3, sticky="ew")
@@ -607,12 +608,12 @@ def on_status_change(hours_entry, choice):
     Disables it otherwise.
     """
     if choice == "Ongoing" or choice == "Completed":
-        hours_entry.configure(state="normal")
+        hours_entry.configure(state="normal", fg_color="white")
     else:
         # hours_entry.configure(state="normal")
         hours_entry.delete(0, "end")
         hours_entry.insert(0, "0")
-        hours_entry.configure(state="disabled")
+        hours_entry.configure(state="disabled", fg_color="#C0C0C0")
 
 
 def select_image(curr_image_path, image_label):
@@ -659,7 +660,7 @@ def save_edited_form(window, tracker, game, error_label, title, platform, status
     game.rating = int(rating)
     game.hours_played = int(hours) if hours else 0
 
-    if not title or not platform or not status:
+    if not platform or not status:
         error_label.configure(text="Please enter all mandatory fields")
         return
     just_filename = ""
@@ -741,7 +742,7 @@ def open_add_game_window(master, masterTracker):
 
     # Hours entry
     hours_entry = ctk.CTkEntry(status_hours_frame, width=200, height=40, placeholder_text="0", validate="key",
-                               validatecommand=vcmd)
+                               fg_color="#C0C0C0", validatecommand=vcmd)
     hours_entry.insert(0, "0")
     hours_entry.configure(state="disabled")
     hours_entry.grid(row=0, column=3, sticky="ew")
