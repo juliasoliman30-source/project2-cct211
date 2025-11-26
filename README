@@ -1,0 +1,9 @@
+Welcome to our CCT211 Project! This is a TKinter GUI program that aims to have both persistance and meet the guidelines set out by CRUD (create, read, update, delete).
+You can create new entries, update and delete them, and all of this data is read into a CSV file that is read into the program to display your data!
+
+This is a video game tracker where users can keep track of all the video games they play across different platforms!
+
+----------------------------- NOTE: please download the fonts specified in the fonts folder to have the best experience -------------------------------------------------------
+      
+additionally, there are some issues with Mac. these were unaddressable bugs as each Mac device had a different problem (one Macbook had a problem with the buttons taking a while to be responsive but the windows were normal, while another MacBook had no issues with buttons but the windows were not layered correctly). 
+these issues were not related to the code and seemingly a TKinter issue. if possible, please run this program on Windows as there are no issues with Windows devices.                                                                                                                                        
