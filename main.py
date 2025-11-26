@@ -200,7 +200,7 @@ class GameEntry(ctk.CTkFrame):
                                    text_color="#2C2C2C")
         hours_label.grid(
             row=0, column=3,
-            padx=(80, 0),  # <-- manually shift number left/right
+            padx=(80, 0),  # <-- manually shift 
             pady=15,
             sticky="w"
         )
