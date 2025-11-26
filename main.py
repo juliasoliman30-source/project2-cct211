@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from data import *
 from fonts import *
 import os
@@ -32,11 +32,12 @@ class GameTracker:
         """
         Use the data from the csv file to create game entries.
         """
+        games_list = []
         for game_data in self.raw_csv_data:
             status = self.normalize_status(game_data.get("Status", ""))
 
             game = Game(
-                id=game_data.get("Id", ""),
+                id=game_data.get("ID", ""),
                 title=game_data.get("Title", ""),
                 platform=game_data.get("Platform", ""),
                 status=status,
@@ -44,7 +45,8 @@ class GameTracker:
                 hours_played=int(game_data.get("Hours", 0)),
                 imagePath="pictures/" + game_data.get("ImagePath", "")
             )
-            self.games.append(game)
+            games_list.append(game)
+        self.games = games_list
 
     def normalize_status(self, status):
         """Convert CSV status values to match the code's expected values"""
@@ -132,16 +134,16 @@ class GameTracker:
 
 
 class GameEntry(ctk.CTkFrame):
-    def __init__(self, master, game, tracker, parent_window=None, **kwargs):
+    def __init__(self, home_frame, master, game, tracker, parent_window=None, **kwargs):
         super().__init__(master, **kwargs)
         self.game = game
         self.tracker = tracker
         self.parent_window = parent_window
         self.configure(fg_color="#E8E8E8", corner_radius=8, height=60)
 
-        self.setup_entry()
+        self.setup_entry(home_frame)
 
-    def setup_entry(self):
+    def setup_entry(self, home_frame):
         # Configure grid layout
         self.grid_columnconfigure(0, weight=2, minsize=150)  # Title
         self.grid_columnconfigure(1, weight=1, minsize=50)  # Status
@@ -220,7 +222,7 @@ class GameEntry(ctk.CTkFrame):
         delete_img = Image.open("pictures/delete_icon.png")
         delete_icon = ctk.CTkImage(delete_img, size=(16, 16))
         delete_button = ctk.CTkButton(actions_frame, image=delete_icon, text="", width=16, height=16,
-                                      fg_color="transparent", hover=False, command=self.delete_game)
+                                      fg_color="transparent", hover=False, command=lambda: self.delete_game(home_frame))
         delete_button.pack(side=ctk.LEFT, padx=5)
 
     def assign_image_icon(self, parent, icon_path):
@@ -430,115 +432,27 @@ class GameEntry(ctk.CTkFrame):
                                       hover_color="#5A6268", font=("Arial", 16, "bold"), command=new_window.destroy)
         cancel_button.pack(side=ctk.LEFT, padx=10)
 
-    def delete_game(self):
+    def delete_game(self, home_frame):
         """
         Pop up a Yes/No window to confirm the user's delete action.
         """
-        print(f"Delete game: {self.game.title}")  # palceholda
+        response = messagebox.askyesno("Delete Confirmation", f"Are you sure you want to delete {self.game.title}?")
 
-
-class ListPage(ctk.CTkFrame):
-    def __init__(self, master, tracker, status, **kwargs):
-        super().__init__(master, **kwargs)
-        self.tracker = tracker
-        self.status = status
-        self.configure(fg_color="#334669")
-
-        self.setup_ui()
-        self.load_games()
-
-    def setup_ui(self):
-        # title Page
-        title_text = f"{self.status.upper()}" if self.status != "all" else "ALL GAMES"
-        self.title_label = ctk.CTkLabel(self, text=title_text,
-                                        font=("Arial", 48, "bold"),
-                                        text_color="white")
-        self.title_label.pack(pady=30)
-
-        # Back button
-        self.back_button = ctk.CTkButton(self, text="← Back to Home",
-                                         width=200, height=40,
-                                         fg_color="#5F7DB0", hover_color="#3D63A1",
-                                         corner_radius=10, text_color="white",
-                                         font=("Arial", 16, "bold"),
-                                         command=self.master.show_home_page)
-        self.back_button.pack(pady=20)
-
-        # Table header
-        self.create_table_header()
-
-        # Create both frame types but don't pack yet
-        self.regular_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", width=900,
-                                                       height=200)  # Fixed height
-
-    def create_table_header(self):
-        """Create the table header with column titles"""
-        header_frame = ctk.CTkFrame(self, fg_color="#5F7DB0", corner_radius=8, height=50)
-        header_frame.pack(fill="x", pady=(0, 10), padx=50)
-        header_frame.pack_propagate(False)
-
-        # configure header grid columns
-        header_frame.grid_columnconfigure(0, weight=2, minsize=150)  # Title
-        header_frame.grid_columnconfigure(1, weight=1, minsize=50)  # Status
-        header_frame.grid_columnconfigure(2, weight=1, minsize=50)  # Platform
-        header_frame.grid_columnconfigure(3, weight=1, minsize=50)  # Hours Played
-        header_frame.grid_columnconfigure(4, weight=0, minsize=50)  # Actions
-
-        # header labels
-        ctk.CTkLabel(header_frame, text="Title",
-                     font=("Arial", 16, "bold"),
-                     text_color="white").grid(row=0, column=0, padx=20, pady=15, sticky="w")
-
-        ctk.CTkLabel(header_frame, text="Status",
-                     font=("Arial", 16, "bold"),
-                     text_color="white").grid(row=0, column=1, padx=20, pady=15, sticky="w")
-
-        ctk.CTkLabel(header_frame, text="Platform",
-                     font=("Arial", 16, "bold"),
-                     text_color="white").grid(row=0, column=2, padx=30, pady=15, sticky="w")
-
-        ctk.CTkLabel(header_frame, text="Hours Played",
-                     font=("Arial", 16, "bold"),
-                     text_color="white").grid(
-            row=0, column=3,
-            padx=0, pady=15,
-            sticky="nsew"  # center
-        )
-
-        ctk.CTkLabel(header_frame, text="Actions",
-                     font=("Arial", 18, "bold"),
-                     text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
-
-    def load_games(self):
-        """Load and display games as individual entries"""
-        games = self.tracker.get_games_by_status(self.status)
-
-        if len(games) <= 3:
-            # Use regular frame (no scrollbar) for 3 or fewer entries
-            self.regular_frame.pack(fill="x", padx=50, pady=10)  # Only fill horizontally
-            content_frame = self.regular_frame
-        else:
-            #scrollable frame for more than 3 entries - height based on content
-            content_height = min(len(games) * 70, 250)
-            self.scrollable_frame.configure(height=content_height)
-            self.scrollable_frame.pack(fill="x", padx=50, pady=10)  # Only fill horizontally
-            content_frame = self.scrollable_frame
-
-        if not games:
-            # Show empty state message
-            empty_label = ctk.CTkLabel(content_frame,
-                                       text=f"No {self.status} games found.\nClick 'Add Game' to get started!",
-                                       font=("Arial", 24),
-                                       text_color="white")
-            empty_label.pack(pady=50)
-            return
-
-        #each game as individual entry
-        for game in games:
-            entry = GameEntry(content_frame, game, self.tracker)
-            entry.pack(fill="x", pady=5, padx=50)
-
+        if response == True:
+            imagePathToDelete = "" 
+            for i, row in enumerate(self.tracker.raw_csv_data):
+                if row.get("ID") == self.game.id:
+                    imagePathToDelete = row.get("ImagePath", "")
+                    self.tracker.raw_csv_data.pop(i)
+                    break
+            write_data_to_csv(self.tracker.raw_csv_data)
+            home_frame.tracker.raw_csv_data = self.tracker.raw_csv_data
+            home_frame.tracker.create_games()
+            if imagePathToDelete:
+                fullPath = os.path.join("pictures", imagePathToDelete)
+                if os.path.exists(fullPath):
+                    os.remove(fullPath)
+            home_frame.update_stats()
 
 def open_new_window(master, title):
     new_window = ctk.CTkToplevel(master)
@@ -636,7 +550,7 @@ def open_new_window(master, title):
         empty_label.pack(pady=50)
     else:
         for game in games:
-            entry = GameEntry(content_frame, game, tracker, parent_window=new_window)
+            entry = GameEntry(master, content_frame, game, tracker, parent_window=new_window)
             entry.pack(fill="x", pady=5)
 
 
@@ -907,7 +821,6 @@ def open_add_game_window(master, masterTracker):
     cancel_button = ctk.CTkButton(buttons_frame, text="Cancel", width=150, height=40, fg_color="#6C757D",
                                   hover_color="#5A6268", font=("Arial", 16, "bold"), command=new_window.destroy)
     cancel_button.pack(side=ctk.LEFT, padx=10)
-
 
 class HomeFrame(ctk.CTkFrame):
     def __init__(self, master, tracker, **kwargs):
