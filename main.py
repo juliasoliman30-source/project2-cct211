@@ -132,10 +132,11 @@ class GameTracker:
 
 
 class GameEntry(ctk.CTkFrame):
-    def __init__(self, master, game, tracker, **kwargs):
+    def __init__(self, master, game, tracker, parent_window=None, **kwargs):
         super().__init__(master, **kwargs)
         self.game = game
         self.tracker = tracker
+        self.parent_window = parent_window
         self.configure(fg_color="#E8E8E8", corner_radius=8, height=60)
 
         self.setup_entry()
@@ -255,6 +256,7 @@ class GameEntry(ctk.CTkFrame):
         new_window.geometry("500x650")
         new_window.configure(fg_color="#95A6C8")
         new_window.attributes("-topmost", True)
+        new_window.resizable(False, False)
         new_window.grab_set()
 
         # form title
@@ -419,7 +421,8 @@ class GameEntry(ctk.CTkFrame):
                                     command=lambda: save_edited_form(new_window, self.tracker, self.game, error_label,
                                                                      title_entry.get(), platform_entry.get(),
                                                                      status_dropdown.get(), curr_rating["value"],
-                                                                     hours_entry.get(), curr_image_path["path"])
+                                                                     hours_entry.get(), curr_image_path["path"],
+                                                                     parent_window=self.parent_window)
                                     )
         save_button.pack(side=ctk.LEFT, padx=10)
 
@@ -542,6 +545,7 @@ def open_new_window(master, title):
     new_window.title(title)
     new_window.geometry("800x600")
     new_window.configure(fg_color="#334669")
+    new_window.resizable(False, False)
 
     new_window.attributes("-topmost", True)
 
@@ -632,7 +636,7 @@ def open_new_window(master, title):
         empty_label.pack(pady=50)
     else:
         for game in games:
-            entry = GameEntry(content_frame, game, tracker)
+            entry = GameEntry(content_frame, game, tracker, parent_window=new_window)
             entry.pack(fill="x", pady=5)
 
 
@@ -709,7 +713,7 @@ def save_form(window, master, tracker, error_label, title, platform, status, rat
     window.destroy()
 
 
-def save_edited_form(window, tracker, game, error_label, title, platform, status, rating, hours, imagePath):
+def save_edited_form(window, tracker, game, error_label, title, platform, status, rating, hours, imagePath, parent_window):
     """
         Version of save_form that performs the same tasks (validating input, saving entry and image to pictures folder,
         as well as refreshing the UI.
@@ -741,6 +745,23 @@ def save_edited_form(window, tracker, game, error_label, title, platform, status
 
     window.destroy()
 
+    if parent_window:
+        parent_window.destroy()
+
+    current_status = tracker.normalize_status(status)
+
+    status_games_reverse = {
+        "all": "All Video Games",
+        "completed": "Completed Video Games",
+        "ongoing": "Ongoing Video Games",
+        "backlog": "Backlogged Video Games",
+        "wishlist": "Wishlisted Video Games"
+    }
+
+    new_title = status_games_reverse.get(current_status, "All Video Games")
+
+    open_new_window(app, new_title)
+
 
 def open_add_game_window(master, masterTracker):
     """
@@ -750,6 +771,7 @@ def open_add_game_window(master, masterTracker):
     new_window.title("Add Game Entry Form")
     new_window.geometry("500x650")
     new_window.configure(fg_color="#334669")
+    new_window.resizable(False, False)
     new_window.grab_set()
 
     # form title
@@ -1045,6 +1067,7 @@ class App(ctk.CTk):
 
 
 app = App()
+app.resizable(False, False)
 my_ctk_font = ctk.CTkFont(family="Roboto", size=14, weight="bold")
 
 app_title = ctk.CTkLabel(app, text="Video Game Tracker", font=VIDEO_GAME_TRACKER_FONT())
