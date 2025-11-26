@@ -356,8 +356,9 @@ class GameEntry(ctk.CTkFrame):
                 if os.path.exists(fullPath):
                     os.remove(fullPath)
             home_frame.update_stats()
+            initialWindowTitle = self.parent_window.title()
             self.parent_window.destroy()
-            open_new_window(app, "All Video Games")
+            open_new_window(app, initialWindowTitle)
         
 def open_new_window(master, title):
     new_window = ctk.CTkToplevel(master)
