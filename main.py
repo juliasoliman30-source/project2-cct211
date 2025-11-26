@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from data import *
 from fonts import *
 import os
@@ -13,16 +13,16 @@ open_logo = Image.open(logo_path)
 tk_logo = ctk.CTkImage(open_logo, size=(190, 120))
 
 class GameEntry(ctk.CTkFrame):
-    def __init__(self, master, game, tracker, parent_window=None, **kwargs):
+    def __init__(self, home_frame, master, game, tracker, parent_window=None, **kwargs):
         super().__init__(master, **kwargs)
         self.game = game
         self.tracker = tracker
         self.parent_window = parent_window
         self.configure(fg_color="#E8E8E8", corner_radius=8, height=60)
 
-        self.setup_entry()
+        self.setup_entry(home_frame)
 
-    def setup_entry(self):
+    def setup_entry(self, home_frame):
         # Configure grid layout with proper weights and minsizes
         self.grid_columnconfigure(0, weight=2, minsize=180)  # Title (increased)
         self.grid_columnconfigure(1, weight=1, minsize=100)  # Status (increased)
@@ -128,7 +128,7 @@ class GameEntry(ctk.CTkFrame):
             corner_radius=6,
             fg_color="#C0392B",
             hover_color="#922B21",
-            command=self.delete_game
+            command=lambda: self.delete_game(home_frame)
         )
         delete_button.pack(side=ctk.LEFT, padx=4)
 
@@ -335,11 +335,29 @@ class GameEntry(ctk.CTkFrame):
                                       hover_color="#5A6268", font=("Arial", 16, "bold"), command=new_window.destroy)
         cancel_button.pack(side=ctk.LEFT, padx=10)
 
-    def delete_game(self):
+    def delete_game(self, home_frame):
         """
         Pop up a Yes/No window to confirm the user's delete action.
         """
-        print(f"Delete game: {self.game.title}")  # palceholda
+        response = messagebox.askyesno("Delete Confirmation", f"Are you sure you want to delete {self.game.title}?")
+
+        if response == True:
+            imagePathToDelete = "" 
+            for i, row in enumerate(self.tracker.raw_csv_data):
+                if row.get("ID") == self.game.id:
+                    imagePathToDelete = row.get("ImagePath", "")
+                    self.tracker.raw_csv_data.pop(i)
+                    break
+            write_data_to_csv(self.tracker.raw_csv_data)
+            home_frame.tracker.raw_csv_data = self.tracker.raw_csv_data
+            home_frame.tracker.create_games()
+            if imagePathToDelete:
+                fullPath = os.path.join("pictures", imagePathToDelete)
+                if os.path.exists(fullPath):
+                    os.remove(fullPath)
+            home_frame.update_stats()
+            self.parent_window.destroy()
+            open_new_window(app, "All Video Games")
         
 def open_new_window(master, title):
     new_window = ctk.CTkToplevel(master)
@@ -436,7 +454,7 @@ def open_new_window(master, title):
         empty_label.pack(pady=50)
     else:
         for game in games:
-            entry = GameEntry(content_frame, game, tracker, parent_window=new_window)
+            entry = GameEntry(master, content_frame, game, tracker, parent_window=new_window)
             entry.pack(fill="x", pady=5)
 
 

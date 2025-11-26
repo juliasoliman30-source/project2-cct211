@@ -3,8 +3,6 @@ from PIL import Image
 from tkinter import filedialog
 from data import *
 from fonts import *
-import os
-import shutil
 from game import *
 
 class GameTracker:
@@ -17,11 +15,12 @@ class GameTracker:
         """
         Use the data from the csv file to create game entries.
         """
+        games_list = []
         for game_data in self.raw_csv_data:
             status = self.normalize_status(game_data.get("Status", ""))
 
             game = Game(
-                id=game_data.get("Id", ""),
+                id=game_data.get("ID", ""),
                 title=game_data.get("Title", ""),
                 platform=game_data.get("Platform", ""),
                 status=status,
@@ -29,7 +28,8 @@ class GameTracker:
                 hours_played=int(game_data.get("Hours", 0)),
                 imagePath="pictures/" + game_data.get("ImagePath", "")
             )
-            self.games.append(game)
+            games_list.append(game)
+        self.games = games_list
 
     def normalize_status(self, status):
         """Convert CSV status values to match the code's expected values"""
