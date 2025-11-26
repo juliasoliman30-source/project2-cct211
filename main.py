@@ -296,8 +296,7 @@ class GameEntry(ctk.CTkFrame):
                                                                                                       padx=20,
                                                                                                       anchor="w")
         title_entry = ctk.CTkEntry(form_frame, width=500, height=40, placeholder_text="Enter game title",
-                                   fg_color="#C0C0C0")
-        title_entry.configure(state="readonly")
+                                   fg_color="#C0C0C0", state="readonly", text_color="white")
         title_entry.pack(padx=20)
         title_entry.insert(0, self.game.title)
 
@@ -747,7 +746,7 @@ def save_edited_form(window, tracker, game, error_label, title, platform, status
     game.rating = int(rating)
     game.hours_played = int(hours) if hours else 0
 
-    if not title or not platform or not status:
+    if not platform or not status:
         error_label.configure(text="Please enter all mandatory fields")
         return
     just_filename = ""
