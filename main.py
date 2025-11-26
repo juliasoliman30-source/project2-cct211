@@ -138,30 +138,31 @@ class GameEntry(ctk.CTkFrame):
         super().__init__(master, **kwargs)
         self.game = game
         self.tracker = tracker
-        self.parent_window = parent_window
         self.configure(fg_color="#E8E8E8", corner_radius=8, height=60)
 
         self.setup_entry(home_frame)
 
     def setup_entry(self, home_frame):
-        # Configure grid layout
-        self.grid_columnconfigure(0, weight=2, minsize=150)  # Title
-        self.grid_columnconfigure(1, weight=1, minsize=50)  # Status
-        self.grid_columnconfigure(2, weight=1, minsize=50)  # Platform
-        self.grid_columnconfigure(3, weight=1, minsize=50)  # Hours Played
-        self.grid_columnconfigure(4, weight=0, minsize=50)  # Actions
+        # Configure grid layout with proper weights and minsizes
+        self.grid_columnconfigure(0, weight=2, minsize=180)  # Title (increased)
+        self.grid_columnconfigure(1, weight=1, minsize=100)  # Status (increased)
+        self.grid_columnconfigure(2, weight=1, minsize=100)  # Platform (increased)
+        self.grid_columnconfigure(3, weight=1, minsize=120)  # Hours Played (increased)
+        self.grid_columnconfigure(4, weight=0, minsize=80)   # Actions
 
         # Game Title
         title_frame = ctk.CTkFrame(self, fg_color="transparent")
-        title_frame.grid(row=0, column=0, padx=10, pady=15, sticky="w")
+        title_frame.grid(row=0, column=0, padx=15, pady=15, sticky="w")
         self.assign_image_icon(title_frame, self.game.imagePath)
 
         # title text
-        title_label = ctk.CTkLabel(title_frame, text=self.game.title,
-                                   font=ENTRY_FONT(),
-                                   text_color="#2C2C2C",
-                                   wraplength=100
-                                   )
+        title_label = ctk.CTkLabel(
+            title_frame,
+            text=self.game.title,
+            font=ENTRY_FONT(),
+            text_color="#2C2C2C",
+            wraplength=120
+        )
         title_label.pack(side=ctk.LEFT)
 
         # Status
@@ -170,20 +171,23 @@ class GameEntry(ctk.CTkFrame):
         if status_text == "WISHLIST":
             status_text = "WISHLISTED"
 
-        status_label = ctk.CTkLabel(self, text=status_text,
-                                    font=ENTRY_FONT(),
-                                    text_color="white",
-                                    fg_color=status_color,
-                                    corner_radius=12)
-        status_label.grid(row=0, column=1, padx=(0, 10), pady=15, sticky="w")
+        status_label = ctk.CTkLabel(
+            self,
+            text=status_text,
+            font=ENTRY_FONT(),
+            text_color="white",
+            fg_color=status_color,
+            corner_radius=12
+        )
+        status_label.grid(row=0, column=1, padx=10, pady=15, sticky="w")
 
         # Platform
         platform_frame = ctk.CTkFrame(self, fg_color="transparent")
         platform_frame.grid(
             row=0, column=2,
-            padx=(20, 0),  # <– change this number to nudge left/right
+            padx=10,
             pady=15,
-            sticky="w"
+            sticky="nsew"
         )
 
         platform_label = ctk.CTkLabel(
@@ -195,35 +199,59 @@ class GameEntry(ctk.CTkFrame):
         platform_label.pack(anchor="center")
 
         # Hours played
-        hours_text = str(self.game.hours_played) if self.game.hours_played > 0 or self.game.status in ["ongoing",
-                                                                                                       "completed"] else "--"
-        hours_label = ctk.CTkLabel(self, text=hours_text,
-                                   font=ENTRY_FONT(),
-                                   text_color="#2C2C2C")
+        hours_text = (
+            str(self.game.hours_played)
+            if self.game.hours_played > 0 or self.game.status in ["ongoing", "completed"]
+            else "--"
+        )
+        hours_label = ctk.CTkLabel(
+            self,
+            text=hours_text,
+            font=ENTRY_FONT(),
+            text_color="#2C2C2C"
+        )
         hours_label.grid(
             row=0, column=3,
-            padx=(80, 0),  # <-- manually shift 
+            padx=0,
             pady=15,
-            sticky="w"
+            sticky="nsew"   # center in the column
         )
 
-        # Action buttons
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
-        actions_frame.grid(row=0, column=4, padx=20, pady=15, sticky="e")
+        actions_frame.grid(row=0, column=4, padx=15, pady=15, sticky="e")
 
-        # edit button
+        # Edit entry button
         edit_img = Image.open("pictures/edit_icon.png")
-        edit_icon = ctk.CTkImage(edit_img, size=(16, 16))
-        edit_button = ctk.CTkButton(actions_frame, image=edit_icon, text="", width=16, height=16,
-                                    fg_color="transparent", hover=False, command=self.edit_game)
-        edit_button.pack(side=ctk.LEFT, padx=5)
+        edit_icon = ctk.CTkImage(edit_img, size=(18, 18))
+        edit_button = ctk.CTkButton(
+            actions_frame,
+            image=edit_icon,
+            text="",
+            width=32,
+            height=32,
+            corner_radius=6,
+            fg_color="#5F7DB0",
+            hover_color="#3D63A1",
+            command=self.edit_game
+        )
+        edit_button.pack(side=ctk.LEFT, padx=4)
 
-        # delete button
+        # Delete entry button
         delete_img = Image.open("pictures/delete_icon.png")
-        delete_icon = ctk.CTkImage(delete_img, size=(16, 16))
-        delete_button = ctk.CTkButton(actions_frame, image=delete_icon, text="", width=16, height=16,
-                                      fg_color="transparent", hover=False, command=lambda: self.delete_game(home_frame))
-        delete_button.pack(side=ctk.LEFT, padx=5)
+
+        delete_icon = ctk.CTkImage(delete_img, size=(18, 18))
+        delete_button = ctk.CTkButton(
+            actions_frame,
+            image=delete_icon,
+            text="",
+            width=32,
+            height=32,
+            corner_radius=6,
+            fg_color="#C0392B",
+            hover_color="#922B21",
+            command=lambda: self.delete_game(home_frame)
+        )
+        delete_button.pack(side=ctk.LEFT, padx=4)
 
     def assign_image_icon(self, parent, icon_path):
         if not icon_path or not os.path.exists(icon_path):
@@ -240,12 +268,11 @@ class GameEntry(ctk.CTkFrame):
         label.image = icon_image
 
     def get_status_color(self, status):
-        """Return color for status badge"""
         colors = {
-            "completed": "#28A745",  # Green
-            "ongoing": "#FFC107",  # Yellow
-            "backlog": "#6C757D",  # Gray
-            "wishlist": "#17A2B8"  # Teal
+            "completed": "#28A745",   # Green
+            "ongoing": "#FFC107",     # Yellow
+            "backlog": "#6C757D",     # Gray
+            "wishlist": "#17A2B8"     # Teal
         }
         return colors.get(status, "#6C757D")
 
@@ -258,7 +285,6 @@ class GameEntry(ctk.CTkFrame):
         new_window.geometry("500x650")
         new_window.configure(fg_color="#95A6C8")
         new_window.attributes("-topmost", True)
-        new_window.resizable(False, False)
         new_window.grab_set()
 
         # form title
@@ -295,11 +321,7 @@ class GameEntry(ctk.CTkFrame):
 
         # status label
         ctk.CTkLabel(status_hours_frame, text="Status *", font=("Arial", 16, "bold"), text_color="white").grid(row=0,
-                                                                                                               column=0,
-                                                                                                               sticky="w",
-                                                                                                               padx=(
-                                                                                                                   0,
-                                                                                                                   10))
+                                                                                                               column=0,)
 
         # dropdown
         status_options = ["Ongoing", "Completed", "Backlog", "Wishlisted"]
@@ -423,8 +445,7 @@ class GameEntry(ctk.CTkFrame):
                                     command=lambda: save_edited_form(new_window, self.tracker, self.game, error_label,
                                                                      title_entry.get(), platform_entry.get(),
                                                                      status_dropdown.get(), curr_rating["value"],
-                                                                     hours_entry.get(), curr_image_path["path"],
-                                                                     parent_window=self.parent_window)
+                                                                     hours_entry.get(), curr_image_path["path"])
                                     )
         save_button.pack(side=ctk.LEFT, padx=10)
 
@@ -459,7 +480,6 @@ def open_new_window(master, title):
     new_window.title(title)
     new_window.geometry("800x600")
     new_window.configure(fg_color="#334669")
-    new_window.resizable(False, False)
 
     new_window.attributes("-topmost", True)
 
@@ -497,33 +517,33 @@ def open_new_window(master, title):
     header_frame.pack(fill="x", pady=(0, 10), padx=10)
     header_frame.pack_propagate(False)
 
-    # header for columns grid
-    header_frame.grid_columnconfigure(0, weight=2, minsize=100)  # Title
-    header_frame.grid_columnconfigure(1, weight=1, minsize=90)  # Status
-    header_frame.grid_columnconfigure(2, weight=1, minsize=80)  # Platform
-    header_frame.grid_columnconfigure(3, weight=1, minsize=150)  # Hours Played
-    header_frame.grid_columnconfigure(4, weight=0, minsize=100)  # actions column?
+    # header for columns grid - match the GameEntry configuration
+    header_frame.grid_columnconfigure(0, weight=2, minsize=180)  # Title
+    header_frame.grid_columnconfigure(1, weight=1, minsize=100)  # Status
+    header_frame.grid_columnconfigure(2, weight=1, minsize=100)  # Platform
+    header_frame.grid_columnconfigure(3, weight=1, minsize=120)  # Hours Played
+    header_frame.grid_columnconfigure(4, weight=0, minsize=80)  # Actions
 
     # labels for header
     ctk.CTkLabel(header_frame, text="Title",
                  font=("Arial", 18, "bold"),
-                 text_color="white").grid(row=0, column=0, padx=20, pady=15, sticky="w")
+                 text_color="white").grid(row=0, column=0, padx=15, pady=15, sticky="w")
 
     ctk.CTkLabel(header_frame, text="Status",
                  font=("Arial", 18, "bold"),
-                 text_color="white").grid(row=0, column=1, padx=20, pady=15, sticky="w")
+                 text_color="white").grid(row=0, column=1, padx=10, pady=15, sticky="w")
 
     ctk.CTkLabel(header_frame, text="Platform",
                  font=("Arial", 18, "bold"),
-                 text_color="white").grid(row=0, column=2, padx=20, pady=15, sticky="w")
+                 text_color="white").grid(row=0, column=2, padx=10, pady=15, sticky="w")
 
     ctk.CTkLabel(header_frame, text="Hours Played",
                  font=("Arial", 18, "bold"),
-                 text_color="white").grid(row=0, column=3, padx=20, pady=15, sticky="w")
+                 text_color="white").grid(row=0, column=3, padx=10, pady=15, sticky="w")
 
     ctk.CTkLabel(header_frame, text="Actions",
                  font=("Arial", 18, "bold"),
-                 text_color="white").grid(row=0, column=4, padx=20, pady=15, sticky="e")
+                 text_color="white").grid(row=0, column=4, padx=15, pady=15, sticky="e")
 
     # Create both frame types but don't pack yet
     regular_frame = ctk.CTkFrame(new_window, fg_color="transparent")
@@ -552,7 +572,6 @@ def open_new_window(master, title):
         for game in games:
             entry = GameEntry(master, content_frame, game, tracker, parent_window=new_window)
             entry.pack(fill="x", pady=5)
-
 
 def update_rating(curr_rating, given_rating, stars_list, empty_star_icon, filled_star_icon):
     """
@@ -627,7 +646,7 @@ def save_form(window, master, tracker, error_label, title, platform, status, rat
     window.destroy()
 
 
-def save_edited_form(window, tracker, game, error_label, title, platform, status, rating, hours, imagePath, parent_window):
+def save_edited_form(window, tracker, game, error_label, title, platform, status, rating, hours, imagePath):
     """
         Version of save_form that performs the same tasks (validating input, saving entry and image to pictures folder,
         as well as refreshing the UI.
@@ -659,23 +678,6 @@ def save_edited_form(window, tracker, game, error_label, title, platform, status
 
     window.destroy()
 
-    if parent_window:
-        parent_window.destroy()
-
-    current_status = tracker.normalize_status(status)
-
-    status_games_reverse = {
-        "all": "All Video Games",
-        "completed": "Completed Video Games",
-        "ongoing": "Ongoing Video Games",
-        "backlog": "Backlogged Video Games",
-        "wishlist": "Wishlisted Video Games"
-    }
-
-    new_title = status_games_reverse.get(current_status, "All Video Games")
-
-    open_new_window(app, new_title)
-
 
 def open_add_game_window(master, masterTracker):
     """
@@ -685,7 +687,6 @@ def open_add_game_window(master, masterTracker):
     new_window.title("Add Game Entry Form")
     new_window.geometry("500x650")
     new_window.configure(fg_color="#334669")
-    new_window.resizable(False, False)
     new_window.grab_set()
 
     # form title
@@ -980,7 +981,6 @@ class App(ctk.CTk):
 
 
 app = App()
-app.resizable(False, False)
 my_ctk_font = ctk.CTkFont(family="Roboto", size=14, weight="bold")
 
 app_title = ctk.CTkLabel(app, text="Video Game Tracker", font=VIDEO_GAME_TRACKER_FONT())
